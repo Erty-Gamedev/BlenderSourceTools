@@ -241,6 +241,8 @@ class SmdImporter(bpy.types.Operator, Logger):
 			smd.boneIDs[int(id)] = bone.name
 			boneParents[bone.name] = int(parent)
 
+			bone['GSNodeIndex'] = int(id)
+
 			return bone
 
 		if self.append != 'NEW_ARMATURE':
