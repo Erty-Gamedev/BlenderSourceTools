@@ -547,9 +547,14 @@ class SmdExporter(bpy.types.Operator, Logger):
 				self.armature = self.bakeObj(self.armature_src).object
 			exporting_armature = isinstance(id, bpy.types.Object) and id.type == 'ARMATURE'
 
-			bones = list(self.armature.data.bones)
-			bones.sort(key=lambda bone: bone.get('GSNodeIndex', ''))
-			self.exportable_bones = [self.armature.pose.bones[edit_bone.name] for edit_bone in bones if (exporting_armature or edit_bone.use_deform)]
+			def get_pose_bone(edit_bone):
+				pose_bone = self.armature.pose.bones[edit_bone.name]
+				pose_bone['GSNodeIndex'] = edit_bone.get('GSNodeIndex', 999)
+				return pose_bone
+
+			self.exportable_bones = [get_pose_bone(edit_bone) for edit_bone in self.armature.data.bones if (exporting_armature or edit_bone.use_deform)]
+			self.exportable_bones.sort(key=lambda bone: bone.get('GSNodeIndex', 999))
+			
 			skipped_bones = len(self.armature.pose.bones) - len(self.exportable_bones)
 			if skipped_bones:
 				print("- Skipping {} non-deforming bones".format(skipped_bones))
